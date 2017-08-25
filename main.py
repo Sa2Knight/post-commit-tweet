@@ -27,3 +27,15 @@ def parse_commit_log(repo_name, commit):
     'url': f"https://github.com/{repo_name}/commit/{commit['sha']}",
     'message': commit['message']
   }
+
+event = get_recent_push_event()
+tweet = f"""
+@tos
+Githubにコミットをプッシュしました。
+[{event['repository']}] 「{event['commits'][0]['message']}」
+""".strip()
+if 1 < len(event['commits']):
+  tweet += f"ほか{len(event['commits']) - 1}件"
+tweet += f"\n{event['commits'][0]['url']}"
+
+print(tweet)
