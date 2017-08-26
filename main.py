@@ -15,6 +15,21 @@ def tweet(text):
   t = twitter.Twitter(auth=auth)
   t.statuses.update(status=text)
 
+def tweet_event(event):
+  tweet_text = f"""
+  @null
+
+  Githubにコミットをプッシュしました。
+
+  [{event['repository']}]
+
+  「{event['commits'][0]['message']}」
+  """.strip()
+  if 1 < len(event['commits']):
+    tweet_text += f"ほか{len(event['commits']) - 1}件"
+  tweet_text += f"\n\n{event['commits'][0]['url']}"
+  tweet(tweet_text)
+
 def save_id(id):
   with open(FILE_NAME, 'w') as f:
     f.write(id)
@@ -54,16 +69,9 @@ def get_recent_push_event():
   }
 
 event = get_recent_push_event()
-tweet_text = f"""
-@null
-
-Githubにコミットをプッシュしました。
-
-[{event['repository']}]
-
-「{event['commits'][0]['message']}」
-""".strip()
-if 1 < len(event['commits']):
-  tweet_text += f"ほか{len(event['commits']) - 1}件"
-tweet_text += f"\n\n{event['commits'][0]['url']}"
-
+if is_new_id(event['id']):
+  tweet_event(event)
+  save_id(event['id'])
+  print('ツイートを投稿しました')
+else:
+  print('ツイートは不要です')
