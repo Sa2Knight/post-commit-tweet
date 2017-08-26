@@ -20,8 +20,14 @@ def save_id(id):
     f.write(id)
 
 def load_id():
-  with open(FILE_NAME, 'r') as f:
-    return f.readline()
+  if os.path.exists(FILE_NAME):
+    with open(FILE_NAME, 'r') as f:
+      return f.readline()
+  else:
+    return ''
+
+def is_new_id(id):
+  return id != load_id()
 
 def parse_commit_log(repo_name, commit):
   return {
@@ -38,7 +44,7 @@ def get_repository_description(repo_name):
 def get_recent_push_event():
   response = requests.get(EVENTS_URL)
   events   = json.loads(response.text)
-  recent_event = list(filter(lambda e: e['type'] == 'PushEvent', events))[5]
+  recent_event = list(filter(lambda e: e['type'] == 'PushEvent', events))[0]
   repo_name    = recent_event['repo']['name']
   commits      = list(map(lambda c: parse_commit_log(repo_name, c), recent_event['payload']['commits']))
   return {
@@ -61,4 +67,3 @@ if 1 < len(event['commits']):
   tweet_text += f"ほか{len(event['commits']) - 1}件"
 tweet_text += f"\n\n{event['commits'][0]['url']}"
 
-tweet(tweet_text)
