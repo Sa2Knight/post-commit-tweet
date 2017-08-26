@@ -75,3 +75,4 @@ if is_new_id(event['id']):
   print('ツイートを投稿しました')
 else:
   print('ツイートは不要です')
+
